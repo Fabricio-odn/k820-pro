@@ -73,6 +73,12 @@ def cor_de_selecao(fundo):
     return max((escuro, claro), key=contraste)
 
 
+def cor_texto_bloqueado(fundo, texto):
+    """Texto de tecla que não pode ser mexida (Fn): o texto da versão a meio caminho
+    do fundo, apagado mas ainda legível."""
+    return tuple(round(t + (f - t) * 0.45) for t, f in zip(texto, fundo))
+
+
 def fundo_da_tecla(versao: Versao, nome: str, cores: dict):
     """Cor de fundo no desenho: a cor de luz da tecla, se houver, senão a da versão."""
     return cores[nome] if nome in cores else cor_da_tecla(versao, nome)[0]

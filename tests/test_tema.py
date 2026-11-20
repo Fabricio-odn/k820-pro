@@ -55,3 +55,27 @@ def test_idioma_sobrevive_a_troca_de_tema(tmp_path, monkeypatch):
     j.aj_versao.set_selected(1)
     assert Preferencias.carregar().idioma == "en"
     j.destroy()
+
+
+def test_tema_declara_versao_da_libadwaita():
+    import subprocess, sys
+    r = subprocess.run([sys.executable, "-c", "import k820_pro.gui.tema"],
+                       capture_output=True, text=True, cwd=Path(__file__).resolve().parent.parent)
+    assert "without specifying a version" not in r.stderr and r.returncode == 0, r.stderr
+
+
+def test_falha_ao_salvar_vira_mensagem(tmp_path, monkeypatch):
+    _gtk()
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    from k820_pro.gui.janela import Janela
+    from k820_pro.preferencias import Preferencias
+    avisos = []
+    j = Janela(None)
+    monkeypatch.setattr(j, "avisar", avisos.append)
+    def falhar(*_a, **_k):
+        raise PermissionError("somente leitura")
+    monkeypatch.setattr(Preferencias, "salvar", falhar)
+    j._alternar_tema()
+    j.aj_versao.set_selected(2)
+    assert len(avisos) == 2 and all("somente leitura" in a for a in avisos)
+    j.destroy()

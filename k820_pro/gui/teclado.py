@@ -8,7 +8,7 @@ from gi.repository import Gtk, Pango, PangoCairo  # noqa: E402
 
 from ..layout import TECLAS
 from .tema import CORES_DESENHO
-from .versoes import VERSOES, cor_da_tecla, cor_de_selecao, fundo_da_tecla
+from .versoes import VERSOES, cor_da_tecla, cor_de_selecao, cor_texto_bloqueado, fundo_da_tecla
 
 ROTULOS = {
     "esc": "Esc", "delete": "Del", "grave": "`", "menos": "-", "igual": "=", "backspace": "⌫",
@@ -98,7 +98,8 @@ class Teclado(Gtk.DrawingArea):
             else:
                 cr.set_source_rgb(*(c / 255 for c in cor_da_tecla(self.versao, t.nome)[1]))
             if t.nome in self.bloqueadas:
-                cr.set_source_rgb(0.5, 0.5, 0.5)
+                apagado = cor_texto_bloqueado(fundo, cor_da_tecla(self.versao, t.nome)[1])
+                cr.set_source_rgb(*(c / 255 for c in apagado))
             camada = PangoCairo.create_layout(cr)
             camada.set_font_description(fonte)
             camada.set_text(texto, -1)

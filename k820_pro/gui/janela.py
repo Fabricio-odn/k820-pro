@@ -164,7 +164,7 @@ class Janela(Adw.ApplicationWindow):
     def _trocar_idioma(self, acao, valor):
         acao.set_state(valor)
         self.prefs.idioma = valor.get_string()
-        self.prefs.salvar()
+        self._salvar_prefs()
         self.avisar(t("Reinicie o programa para trocar o idioma."))
 
     # iluminação -------------------------------------------------------------
@@ -485,6 +485,13 @@ class Janela(Adw.ApplicationWindow):
         g3.add(linha)
         return pag
 
+    def _salvar_prefs(self):
+        """A mudança já vale na tela; se não der para gravar, avisa em vez de quebrar."""
+        try:
+            self.prefs.salvar()
+        except OSError as e:
+            self.avisar(t("Não consegui salvar a preferência: {erro}", erro=e))
+
     def _atualizar_botao_tema(self):
         claro = self.prefs.tema == "claro"
         self.botao_tema.set_icon_name("weather-clear-night-symbolic" if claro else "weather-clear-symbolic")
@@ -494,7 +501,7 @@ class Janela(Adw.ApplicationWindow):
         self.prefs.tema = "claro" if self.prefs.tema == "escuro" else "escuro"
         if self.tema:
             self.tema.aplicar(self.prefs.tema)
-        self.prefs.salvar()
+        self._salvar_prefs()
         self._atualizar_botao_tema()
         for kb in self._teclados() + [self.luz_previa]:
             kb.tema = self.prefs.tema
@@ -505,7 +512,7 @@ class Janela(Adw.ApplicationWindow):
 
     def _trocar_versao(self):
         self.prefs.versao = list(VERSOES)[self.aj_versao.get_selected()]
-        self.prefs.salvar()
+        self._salvar_prefs()
         for kb in self._teclados():
             kb.versao = VERSOES[self.prefs.versao]
             kb.queue_draw()

@@ -301,4 +301,6 @@ TRADUCOES = {
     "Tema claro": {"en": "Light theme", "zh": "浅色主题"},
     "Tema escuro": {"en": "Dark theme", "zh": "深色主题"},
     "Cores": {"en": "Colors", "zh": "颜色"},
+    "Não consegui salvar a preferência: {erro}": {
+        "en": "Could not save the preference: {erro}", "zh": "无法保存偏好设置：{erro}"},
 }

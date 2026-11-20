@@ -4,7 +4,11 @@ Troca o esquema de cores da libadwaita e a folha CSS na hora, sem reiniciar.
 """
 from pathlib import Path
 
-from gi.repository import Adw, Gdk, Gtk
+import gi
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Adw, Gdk, Gtk  # noqa: E402
 
 from ..preferencias import TEMAS
 
