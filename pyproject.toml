@@ -1,7 +1,7 @@
 [project]
 name = "k820-pro"
 version = "0.1.0"
-description = "Configura o teclado Ajazz AK820 Pro (0c45:800a) no Linux, sem o software do fabricante"
+description = "K820 Pro Studio: configurador do teclado Ajazz AK820 Pro (0c45:800a) para Linux"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Fabricio Oliveira" }]

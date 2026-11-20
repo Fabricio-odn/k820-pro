@@ -81,7 +81,7 @@ def _botao(rotulo, ao_clicar, sugerido=True):
 
 class Janela(Adw.ApplicationWindow):
     def __init__(self, app, tema=None):
-        super().__init__(application=app, title="K820 Pro", default_width=1000, default_height=720)
+        super().__init__(application=app, title="K820 Pro Studio", default_width=1000, default_height=720)
         self.tema = tema
         self.trabalho = Trabalhador()
         self.prefs = Preferencias.carregar()
