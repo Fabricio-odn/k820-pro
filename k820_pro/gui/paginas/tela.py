@@ -60,11 +60,22 @@ class PaginaTela(Gtk.Box):
         self.enviar.add_css_class("pill")
         self.enviar.connect("clicked", lambda *_: self._enviar())
         direita.append(self.enviar)
+        self.aviso_cabo = Gtk.Label(label=t("A tela só pode ser trocada pelo cabo USB."), xalign=0, wrap=True,
+                                    visible=False)
+        self.aviso_cabo.add_css_class("secundario")
+        direita.append(self.aviso_cabo)
+        self._modo = None
         self.colunas = Colunas(esquerda, direita, 340)
         self.append(self.colunas)
 
     def teclados(self):
         return []
+
+    def definir_modo(self, modo):
+        """Pelo dongle a tela não muda (o software oficial também não deixa)."""
+        self._modo = modo
+        self.aviso_cabo.set_visible(modo == "dongle")
+        self.enviar.set_sensitive(bool(self._quadros) and modo != "dongle")
 
     def definir_empilhado(self, empilhado):
         self.colunas.definir_empilhado(empilhado)
@@ -107,7 +118,7 @@ class PaginaTela(Gtk.Box):
             self._quadros = list(zip(*resultado))
             self._animacao += 1
             self.legenda.set_label(t("{arquivo} · {n} quadro(s)", arquivo=Path(caminho).name, n=len(self._quadros)))
-            self.enviar.set_sensitive(True)
+            self.enviar.set_sensitive(self._modo != "dongle")
             self._tocar(self._animacao, 0)
 
         threading.Thread(target=lambda: _em_thread(carregar, pronto), daemon=True).start()
@@ -131,7 +142,7 @@ class PaginaTela(Gtk.Box):
             GLib.idle_add(self.progresso.set_fraction, i / n)
 
         def depois(_erro):
-            self.enviar.set_sensitive(True)
+            self.enviar.set_sensitive(self._modo != "dongle")
             self.progresso.set_visible(False)
 
         self.janela.executar(lambda: S.enviar_tela(caminho, modo, progresso),

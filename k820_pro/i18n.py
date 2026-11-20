@@ -328,4 +328,13 @@ TRADUCOES = {
     'Ciano': {"en": 'Cyan', "zh": '青色'},
     'Azul': {"en": 'Blue', "zh": '蓝色'},
     'Roxo': {"en": 'Purple', "zh": '紫色'},
+    # dongle 2.4 GHz
+    'O teclado não respondeu pelo dongle. Ele está ligado no 2.4 GHz e acordado? Aperte uma tecla e tente de novo.': {"en": 'The keyboard did not answer through the dongle. Is it on 2.4 GHz and awake? Press a key and try again.', "zh": '键盘没有通过接收器响应。它是否处于 2.4 GHz 模式并已唤醒？按任意键后重试。'},
+    'A tela só pode ser trocada pelo cabo USB.': {"en": 'The screen can only be changed over the USB cable.', "zh": '屏幕只能通过 USB 数据线更改。'},
+    'A restauração de fábrica só funciona pelo cabo USB (ou segure Fn + Espaço por 3 a 5 s).': {"en": 'Factory reset only works over the USB cable (or hold Fn + Space for 3 to 5 s).', "zh": '恢复出厂设置只能通过 USB 数据线进行（或长按 Fn + 空格 3 到 5 秒）。'},
+    "Conectado pelo dongle 2.4 GHz": {"en": "Connected through the 2.4 GHz dongle", "zh": "已通过 2.4 GHz 接收器连接"},
+    "Desconectado: ligue o cabo USB ou o dongle": {"en": "Disconnected: plug in the USB cable or the dongle", "zh": "未连接：请插入 USB 数据线或接收器"},
+    "Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB ou pelo dongle 2.4 GHz.": {
+        "en": "Keyboard not found. Connect the AK820 Pro with the USB cable or the 2.4 GHz dongle.",
+        "zh": "未找到键盘。请用 USB 数据线或 2.4 GHz 接收器连接 AK820 Pro。"},
 }

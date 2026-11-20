@@ -41,7 +41,7 @@ Everything you change is saved on the keyboard itself and keeps working on Windo
 | | |
 |---|---|
 | **Keyboard** | Ajazz AK820 Pro with screen, USB ID `0c45:800a`. Tested with firmware 1.10. The same official software also supports `0c45:8009`, but it was not tested here. |
-| **Connection** | **USB cable.** Configuration does not work over the 2.4 GHz dongle or Bluetooth (the wireless protocol has not been studied). Configure over the cable and then go back to wireless: the keyboard remembers everything. |
+| **Connection** | **USB cable** or **2.4 GHz dongle** (`0c45:fdfd`). Everything works over the dongle except the **screen** and **factory reset**, which are cable-only (the official software works the same way). **Not Bluetooth**: the official software doesn't configure over it either. With both cable and dongle plugged in, the program uses the cable. |
 | **Command line** | Python 3.10 or newer. No dependencies for lighting, keys and settings; Pillow to send images. |
 | **App** | GTK 4.16+ and **libadwaita 1.7+**, with PyGObject and pycairo: Fedora 42+, Ubuntu 25.04+, Debian 13+, Arch Linux. |
 
@@ -81,7 +81,7 @@ cd k820-pro
 sudo bash scripts/instalar-udev.sh
 ```
 
-Then **unplug and replug the keyboard cable**. This is a one-time step. The rule only opens the keyboard's configuration channels, and only to whoever is logged in on the machine (see [Security and privacy](#security-and-privacy)).
+Then **unplug and replug the keyboard cable and the dongle**. This is a one-time step. The rule only opens the configuration channels of the keyboard and the dongle, and only to whoever is logged in on the machine (see [Security and privacy](#security-and-privacy)).
 
 ### 4. Add the app to the menu (optional)
 
@@ -99,7 +99,7 @@ From the menu, or in a terminal from inside the project folder:
 python3 -m k820_pro.gui.app
 ```
 
-The header should say **"Connected by cable"**. If it says "Disconnected", see [Troubleshooting](#troubleshooting).
+The header should say **"Connected by cable"** or **"Connected through the 2.4 GHz dongle"**. If it says "Disconnected", see [Troubleshooting](#troubleshooting).
 
 ### Updating
 
@@ -185,8 +185,14 @@ The full list, with the F row on Windows and Mac, is on the app's **Shortcuts** 
 ## Troubleshooting
 
 **"Disconnected" / "Keyboard not found"**
-- Use the **USB cable**; it does not work over the dongle or Bluetooth.
-- Check the ID: `lsusb | grep 0c45` should show `0c45:800a`. A different ID is a different model, not supported yet.
+- Plug in the **USB cable** or the **2.4 GHz dongle**; Bluetooth does not work.
+- Check the IDs: `lsusb | grep 0c45` should show `0c45:800a` (cable) or `0c45:fdfd` (dongle). A different ID is a different model, not supported yet.
+
+**"The keyboard did not answer through the dongle"**
+- The keyboard is asleep or in another mode: press a key and try again, and check that it is on 2.4 GHz (Fn + R). With a 1-minute sleep time it falls asleep quickly; set 5 or 30 in **Settings**.
+
+**The screen or "Restore defaults" don't work**
+- They don't exist over the dongle (not in the official software either). Plug in the cable; to reset without a cable, hold Fn + Space for 3 to 5 seconds.
 
 **"no permission on /dev/hidraw…"**
 - Run `sudo bash scripts/instalar-udev.sh` and **replug the cable**.
@@ -221,7 +227,7 @@ If you installed through `pipx`: `pipx uninstall k820-pro`. Whatever was saved o
 ## Security and privacy
 
 - **No network, no root, no background service.** The program only talks to the keyboard and to the `~/.config/k820-pro` folder.
-- **Configuration channels only.** The udev rule gives the logged-in user (`uaccess`) access to the keyboard's interfaces 2 and 3 only. The interface that carries what you type is never opened.
+- **Configuration channels only.** The udev rule gives the logged-in user (`uaccess`) access to interfaces 2 and 3 of the keyboard and 3 and 4 of the dongle only. The interfaces that carry what you type are never opened.
 - **Fixes a system hole.** The `libgphoto2` database, shipped with Fedora and Ubuntu, mistakes this keyboard for a camera, so systemd lets any program running as your user read what you type. The project's rule undoes that. **It is worth installing even if you don't use the program.** Details in [SECURITY.md](SECURITY.md) (in Portuguese).
 - **Validated input.** Images go through size, pixel and frame limits before being read; configuration files are checked and, if anything looks off, the app falls back to defaults.
 - **Known bytes only.** The program only sends the keyboard sequences that the official software also sends, checked byte by byte by the tests.
@@ -232,7 +238,7 @@ Found a security issue? Use "Report a vulnerability" in the repository's Securit
 
 The protocol was worked out by running the official Windows software (`DeviceDriver.exe` 1.0.0.5) on Linux under **Wine**, with a library loaded through `LD_PRELOAD` that logs every packet exchanged with the keyboard (`scripts/captura/`). The recordings are in `captures/`, and the whole protocol is documented in [docs/protocolo.md](docs/protocolo.md) (in Portuguese).
 
-In short: configuration goes through 64-byte *feature reports* on interface 3 (lighting, a 144-key table for remapping and colors, settings, clock), and the screen image goes in 4096-byte blocks through interface 2, as 128×128 RGB565 frames.
+In short: over the cable, configuration goes through 64-byte *feature reports* on interface 3 (lighting, a 144-key table for remapping and colors, settings, clock), and the screen image goes in 4096-byte blocks through interface 2, as 128×128 RGB565 frames. Over the dongle, the same data goes in 32-byte checksummed packets on the dongle's interface 3, and the keyboard acknowledges each one.
 
 The code:
 

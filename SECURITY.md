@@ -2,7 +2,7 @@
 
 ## O que o programa acessa
 
-- `/dev/hidraw*` das interfaces 2 e 3 do teclado `0c45:800a`, achadas pelo `HID_ID` e pelo número da interface. A interface 0 (as teclas digitadas) nunca é aberta.
+- `/dev/hidraw*` das interfaces 2 e 3 do teclado `0c45:800a` e da interface 3 do dongle `0c45:fdfd`, achadas pelo `HID_ID` e pelo número da interface. As interfaces por onde passam as teclas digitadas (0 no teclado; 0, 1 e 2 no dongle) nunca são abertas nem liberadas pela regra udev.
 - `~/.config/k820-pro/` (`estado.json` e `idioma`), validados ao carregar: qualquer conteúdo fora do formato gera erro, nunca é executado.
 - As imagens que você escolher para a tela, com limite de 64 MB, 40 megapixels e 5000 quadros lidos.
 

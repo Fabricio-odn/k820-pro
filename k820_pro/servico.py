@@ -8,7 +8,8 @@ from datetime import datetime
 
 from . import acoes as A
 from . import protocolo as P
-from .dispositivo import Teclado
+from .dispositivo import ErroTeclado, conectar
+from .i18n import t
 from .estado import Estado
 from .layout import POR_NOME, TECLAS
 
@@ -26,19 +27,23 @@ def tecla(nome):
     return POR_NOME[nome]
 
 
-def _enviar(seq):
-    with Teclado() as t:
-        t.executar(seq)
+def _enviar(cabo, sem_fio):
+    """Manda a sequência do cabo ou a do dongle, conforme a conexão (funções sem argumento)."""
+    with conectar() as tec:
+        tec.executar(cabo() if tec.modo == "cabo" else sem_fio())
+        return tec.modo
 
 
 def aplicar_luz(il: P.Iluminacao):
-    _enviar(P.sequencia_iluminacao(il))
+    _enviar(lambda: P.sequencia_iluminacao(il), lambda: P.sem_fio_iluminacao(il))
 
 
 def aplicar_cores(estado: Estado, cores: dict, brilho=P.BRILHO_MAX):
     """cores: {nome da tecla: "rrggbb"}; substitui as cores guardadas."""
     indices = {tecla(n).indice: cor_hex(c) for n, c in cores.items()}
-    _enviar(P.sequencia_luz_por_tecla(indices, [t.indice for t in TECLAS], brilho))
+    todas = [tec.indice for tec in TECLAS]
+    _enviar(lambda: P.sequencia_luz_por_tecla(indices, todas, brilho),
+            lambda: P.sem_fio_luz_por_tecla(indices, todas, brilho))
     estado.cores = {n: c.strip().lstrip("#").lower() for n, c in cores.items()}
     estado.salvar()
 
@@ -47,13 +52,27 @@ def aplicar_teclas(estado: Estado, mapa: dict):
     """mapa: {nome da tecla: nome da ação}; substitui o remapeamento inteiro."""
     tabela = {}
     for nome, acao in mapa.items():
-        t = tecla(nome)
-        if t.nome == "fn":
+        tec = tecla(nome)
+        if tec.nome == "fn":
             raise ValueError("a tecla Fn não pode ser remapeada")
         b = A.acao(acao)
         if b is not None:
-            tabela[t.indice] = b
-    _enviar(P.sequencia_teclas(tabela))
+            tabela[tec.indice] = b
+
+    def sem_fio():
+        # pelo dongle vai uma tecla por vez, só as que mudaram; a de volta ao padrão
+        # recebe o próprio código, como o software oficial faz
+        quadros = []
+        for nome in sorted(set(mapa) | set(estado.teclas)):
+            tec = tecla(nome)
+            novo = tabela.get(tec.indice)
+            antigo = A.acao(estado.teclas[nome]) if nome in estado.teclas else None
+            if antigo == novo:
+                continue
+            quadros += P.sem_fio_tecla(tec.indice, novo or P.acao_teclado(0, tec.codigo))
+        return quadros
+
+    _enviar(lambda: P.sequencia_teclas(tabela), sem_fio)
     estado.teclas = {n: a.lower() for n, a in mapa.items() if A.acao(a) is not None}
     estado.salvar()
 
@@ -69,14 +88,14 @@ def remapear(estado: Estado, nome, acao):
 
 def aplicar_ajustes(estado: Estado, **mudancas):
     novos = dataclasses.replace(estado.ajustes, **mudancas)
-    _enviar(P.sequencia_ajustes(novos))
+    _enviar(lambda: P.sequencia_ajustes(novos), lambda: P.sem_fio_ajustes(novos))
     estado.ajustes = novos
     estado.salvar()
 
 
 def acertar_relogio(momento=None):
     momento = momento or datetime.now()
-    _enviar(P.sequencia_relogio(momento))
+    _enviar(lambda: P.sequencia_relogio(momento), lambda: P.sem_fio_relogio(momento))
     return momento
 
 
@@ -84,12 +103,15 @@ def enviar_tela(caminho, modo="cortar", progresso=None):
     from . import imagem
     quadros, tempos = imagem.carregar(caminho, modo)
     blocos = P.dados_tela(quadros, tempos)
-    with Teclado() as t:
-        t.enviar_tela(blocos, progresso)
+    with conectar() as tec:
+        tec.enviar_tela(blocos, progresso)
     return len(quadros)
 
 
 def restaurar(estado: Estado):
-    _enviar(P.sequencia_restaurar())
+    def sem_fio():
+        raise ErroTeclado(t("A restauração de fábrica só funciona pelo cabo USB (ou segure Fn + Espaço por 3 a 5 s)."))
+
+    _enviar(P.sequencia_restaurar, sem_fio)
     estado.teclas, estado.cores, estado.ajustes = {}, {}, P.Ajustes()
     estado.salvar()

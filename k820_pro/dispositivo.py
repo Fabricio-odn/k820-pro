@@ -15,6 +15,9 @@ from .i18n import t
 from .protocolo import REPORT_ID, TAM_PACOTE
 
 HID_ID = "0003:00000C45:0000800A"
+HID_ID_DONGLE = "0003:00000C45:0000FDFD"
+INTERFACE_DONGLE = 3
+ESPERA_ECO = 1.5  # segundos para o teclado responder pelo dongle
 INTERFACE_CONFIG = 3
 INTERFACE_TELA = 2
 CONFIRMA_BLOCO = bytes((0x01, 0x5A, 0x02))  # resposta da interface 2 a cada bloco
@@ -39,7 +42,7 @@ def HIDIOCGFEATURE(n):
     return _ioc(3, 0x07, n)
 
 
-def achar_hidraw(classe=Path("/sys/class/hidraw"), interface=INTERFACE_CONFIG):
+def achar_hidraw(classe=Path("/sys/class/hidraw"), interface=INTERFACE_CONFIG, hid_id=HID_ID):
     """Caminho do hidraw da interface pedida do teclado, ou erro se não estiver ligado."""
     try:
         itens = sorted(Path(classe).iterdir())
@@ -48,14 +51,33 @@ def achar_hidraw(classe=Path("/sys/class/hidraw"), interface=INTERFACE_CONFIG):
     for item in itens:
         disp = item / "device"
         try:
-            if f"HID_ID={HID_ID}" not in (disp / "uevent").read_text().split():
+            if f"HID_ID={hid_id}" not in (disp / "uevent").read_text().split():
                 continue
             num = int((disp.resolve().parent / "bInterfaceNumber").read_text(), 16)
         except (OSError, ValueError):
             continue
         if num == interface:
             return f"/dev/{item.name}"
-    raise ErroTeclado(t("Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB."))
+    raise ErroTeclado(t("Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB ou pelo dongle 2.4 GHz."))
+
+
+def modo_conexao(classe=Path("/sys/class/hidraw")):
+    """"cabo", "dongle" ou None. Com os dois ligados, vale o cabo."""
+    for modo, hid_id, interface in (("cabo", HID_ID, INTERFACE_CONFIG),
+                                    ("dongle", HID_ID_DONGLE, INTERFACE_DONGLE)):
+        try:
+            achar_hidraw(classe, interface, hid_id)
+            return modo
+        except ErroTeclado:
+            pass
+    return None
+
+
+def conectar():
+    """Abre o teclado pelo cabo ou, sem ele, pelo dongle 2.4 GHz."""
+    if modo_conexao() == "dongle":
+        return TecladoSemFio()
+    return Teclado()
 
 
 def versao_firmware(classe=Path("/sys/class/hidraw")):
@@ -80,6 +102,8 @@ def preparar_buffer(pacote: bytes) -> bytes:
 
 
 class Teclado:
+    modo = "cabo"
+
     def __init__(self, caminho=None):
         self.caminho = caminho or achar_hidraw()
         try:
@@ -163,3 +187,49 @@ def _esperar_confirmacao(fd, i):
             if resp[:3] == CONFIRMA_BLOCO:
                 return
     raise ErroTeclado(t("o teclado não confirmou o bloco {n} da imagem", n=i + 1))
+
+
+class TecladoSemFio:
+    """O teclado pelo dongle 2.4 GHz: pacotes de 32 bytes na interface 3, cada um
+    confirmado por um eco do teclado."""
+    modo = "dongle"
+
+    def __init__(self, caminho=None):
+        self.caminho = caminho or achar_hidraw(interface=INTERFACE_DONGLE, hid_id=HID_ID_DONGLE)
+        try:
+            self.fd = os.open(self.caminho, os.O_RDWR | os.O_NONBLOCK)
+        except PermissionError:
+            raise ErroTeclado(t("sem permissão em {c}. Instale a regra udev: sudo bash scripts/instalar-udev.sh",
+                                c=self.caminho)) from None
+
+    def fechar(self):
+        if self.fd is not None:
+            os.close(self.fd)
+            self.fd = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.fechar()
+
+    def enviar(self, quadro: bytes):
+        if len(quadro) != P.SEM_FIO_TAM:
+            raise ValueError(f"pacote com {len(quadro)} bytes, esperado {P.SEM_FIO_TAM}")
+        _descartar(self.fd)
+        os.write(self.fd, b"\x00" + quadro)
+        limite = time.monotonic() + ESPERA_ECO
+        while (resta := limite - time.monotonic()) > 0:
+            if select.select([self.fd], [], [], resta)[0]:
+                resp = os.read(self.fd, 64)
+                if len(resp) >= 3 and resp[0] == quadro[0] and resp[2] == quadro[2]:
+                    return resp
+        raise ErroTeclado(t("O teclado não respondeu pelo dongle. Ele está ligado no 2.4 GHz e acordado? Aperte uma tecla e tente de novo."))
+
+    def executar(self, quadros):
+        for q in quadros:
+            self.enviar(q)
+        time.sleep(PAUSA_FINAL)
+
+    def enviar_tela(self, *_a, **_k):
+        raise ErroTeclado(t("A tela só pode ser trocada pelo cabo USB."))

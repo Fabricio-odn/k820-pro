@@ -11,6 +11,6 @@ Ferramenta Linux própria para o teclado Ajazz AK820 Pro (`0c45:800a`, SONiX), n
 - O driver web (ajazz.driveall.cn, protocolo AA/55 na interface 2) **não** funciona com esta unidade; o comando 0x10 fica sem resposta.
 - O protocolo está em `docs/protocolo.md`; os testes de `tests/test_capturas.py` comparam com `captures/*.log`. Para descobrir algo novo, rode `scripts/captura/capturar.sh` (software oficial no Wine, com registro via LD_PRELOAD) e peça ao mantenedor para fazer a ação.
 - A referência do gohv tinha erros (delimitador 55 AA, sono no byte errado, blocos de imagem de 4123 bytes); confie nas capturas.
-- Pelo dongle 2.4G (`0c45:fdfd`) o protocolo não foi estudado.
+- Pelo dongle 2.4 GHz (`0c45:fdfd`, interface 3) o protocolo está em `docs/protocolo.md` e nos testes `tests/test_sem_fio.py`. Tela e restauração de fábrica só pelo cabo. Bluetooth não é suportado pelo software oficial.
 - Capturas vão para `captures/` com nome que diga as ações feitas.
 - Acessar `/dev/hidraw*` precisa da regra udev (`scripts/instalar-udev.sh`). Peça antes de usar `sudo`.

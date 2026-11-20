@@ -10,7 +10,7 @@ from gi.repository import Adw, Gio, GLib, GObject, Gtk  # noqa: E402
 
 from .. import i18n  # noqa: E402
 from .. import servico as S  # noqa: E402
-from ..dispositivo import ErroTeclado, achar_hidraw, versao_firmware  # noqa: E402
+from ..dispositivo import ErroTeclado, modo_conexao, versao_firmware  # noqa: E402
 from ..estado import Estado  # noqa: E402
 from ..i18n import t  # noqa: E402
 from ..preferencias import Preferencias  # noqa: E402
@@ -220,11 +220,11 @@ class Janela(Adw.ApplicationWindow):
         self.pilha.set_visible_child_name(linha.nome)
 
     def _checar_conexao(self):
-        try:
-            achar_hidraw()
-            self.titulo.set_subtitle(t("Conectado pelo cabo"))
-        except ErroTeclado:
-            self.titulo.set_subtitle(t("Desconectado: ligue o cabo USB"))
+        modo = modo_conexao()
+        self.titulo.set_subtitle({"cabo": t("Conectado pelo cabo"),
+                                  "dongle": t("Conectado pelo dongle 2.4 GHz")}.get(
+                                      modo, t("Desconectado: ligue o cabo USB ou o dongle")))
+        self.paginas["tela"].definir_modo(modo)
         versao = versao_firmware()
         if versao:
             self.rodape.set_label(t("Firmware {v}", v=versao))

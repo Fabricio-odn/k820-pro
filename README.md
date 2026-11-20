@@ -41,7 +41,7 @@ Tudo o que você muda fica gravado no próprio teclado e continua valendo no Win
 | | |
 |---|---|
 | **Teclado** | Ajazz AK820 Pro com tela, ID USB `0c45:800a`. Testado com firmware 1.10. O mesmo software oficial atende o `0c45:8009`, mas ele não foi testado aqui. |
-| **Conexão** | **Pelo cabo USB.** Pelo dongle 2.4 GHz ou Bluetooth a configuração não funciona (o protocolo sem fio não foi estudado). Configure pelo cabo e depois volte ao sem fio: o teclado guarda tudo. |
+| **Conexão** | **Cabo USB** ou **dongle 2.4 GHz** (`0c45:fdfd`). Pelo dongle funciona tudo, menos a **tela** e a **restauração de fábrica**, que só vão pelo cabo (o próprio software oficial é assim). **Bluetooth não**: o software oficial também não configura por ele. Com cabo e dongle ligados, o programa usa o cabo. |
 | **Linha de comando** | Python 3.10 ou mais novo. Nenhuma dependência para luz, teclas e ajustes; o Pillow para mandar imagens. |
 | **Interface** | GTK 4.16+ e **libadwaita 1.7+**, com PyGObject e pycairo: Fedora 42+, Ubuntu 25.04+, Debian 13+, Arch Linux. |
 
@@ -81,7 +81,7 @@ cd k820-pro
 sudo bash scripts/instalar-udev.sh
 ```
 
-Depois **desconecte e reconecte o cabo** do teclado. Isso é feito uma vez só. A regra libera apenas os canais de configuração do teclado, e só para quem está logado na máquina (veja [Segurança e privacidade](#segurança-e-privacidade)).
+Depois **desconecte e reconecte o cabo do teclado e o dongle**. Isso é feito uma vez só. A regra libera apenas os canais de configuração do teclado e do dongle, e só para quem está logado na máquina (veja [Segurança e privacidade](#segurança-e-privacidade)).
 
 ### 4. Coloque o app no menu (opcional)
 
@@ -99,7 +99,7 @@ Pelo menu, ou no terminal, de dentro da pasta do projeto:
 python3 -m k820_pro.gui.app
 ```
 
-O cabeçalho deve mostrar **"Conectado pelo cabo"**. Se mostrar "Desconectado", veja [Problemas comuns](#problemas-comuns).
+O cabeçalho deve mostrar **"Conectado pelo cabo"** ou **"Conectado pelo dongle 2.4 GHz"**. Se mostrar "Desconectado", veja [Problemas comuns](#problemas-comuns).
 
 ### Para atualizar
 
@@ -184,9 +184,15 @@ A lista completa, com a fileira F no Windows e no Mac, está na página **Atalho
 
 ## Problemas comuns
 
-**"Desconectado" / "AK820 Pro não encontrado"**
-- Use o **cabo USB**; pelo dongle ou Bluetooth não funciona.
-- Confira o ID: `lsusb | grep 0c45` deve mostrar `0c45:800a`. Outro ID é outro modelo, ainda não suportado.
+**"Desconectado" / "Teclado não encontrado"**
+- Ligue o **cabo USB** ou o **dongle 2.4 GHz**; por Bluetooth não funciona.
+- Confira os IDs: `lsusb | grep 0c45` deve mostrar `0c45:800a` (cabo) ou `0c45:fdfd` (dongle). Outro ID é outro modelo, ainda não suportado.
+
+**"O teclado não respondeu pelo dongle"**
+- O teclado está dormindo ou em outro modo: aperte uma tecla e tente de novo, e confira se ele está no 2.4 GHz (Fn + R). Com o sono em 1 minuto, ele dorme rápido; mude para 5 ou 30 em **Ajustes**.
+
+**A tela ou o "Restaurar padrão" não funcionam**
+- Pelo dongle eles não existem (nem no software oficial). Ligue o cabo; para restaurar sem cabo, segure Fn + Espaço por 3 a 5 segundos.
 
 **"sem permissão em /dev/hidraw…"**
 - Rode `sudo bash scripts/instalar-udev.sh` e **reconecte o cabo**.
@@ -221,7 +227,7 @@ Se instalou pelo `pipx`: `pipx uninstall k820-pro`. O que foi gravado no teclado
 ## Segurança e privacidade
 
 - **Sem rede, sem root, sem serviço em segundo plano.** O programa só fala com o teclado e com a pasta `~/.config/k820-pro`.
-- **Só os canais de configuração.** A regra udev libera para o usuário logado (`uaccess`) apenas as interfaces 2 e 3 do teclado. A interface por onde passa o que você digita nunca é aberta.
+- **Só os canais de configuração.** A regra udev libera para o usuário logado (`uaccess`) apenas as interfaces 2 e 3 do teclado e 3 e 4 do dongle. As interfaces por onde passa o que você digita nunca são abertas.
 - **Corrige um furo do sistema.** O banco de dados do `libgphoto2`, que vem no Fedora e no Ubuntu, confunde este teclado com uma câmera, e por isso o systemd libera a leitura do que é digitado para qualquer programa do seu usuário. A regra do projeto desfaz isso. **Vale instalá-la mesmo se você não for usar o programa.** Detalhes em [SECURITY.md](SECURITY.md).
 - **Entradas validadas.** Imagens passam por limites de tamanho, pixels e quadros antes de serem lidas; os arquivos de configuração são conferidos e, se estiverem estranhos, o app volta aos padrões.
 - **Só bytes conhecidos.** O programa manda ao teclado apenas sequências que o software oficial também manda, conferidas byte a byte pelos testes.
@@ -232,7 +238,7 @@ Encontrou um problema de segurança? Use "Report a vulnerability" na aba Securit
 
 O protocolo foi descoberto rodando o software oficial de Windows (`DeviceDriver.exe` 1.0.0.5) no Linux pelo **Wine**, com uma biblioteca carregada via `LD_PRELOAD` que registra cada pacote trocado com o teclado (`scripts/captura/`). As gravações estão em `captures/`, e o protocolo inteiro está descrito em [docs/protocolo.md](docs/protocolo.md).
 
-Resumo: a configuração é feita por *feature reports* de 64 bytes na interface 3 (iluminação, tabela de 144 teclas para remapeamento e cores, ajustes, relógio), e a imagem da tela vai em blocos de 4096 bytes pela interface 2, quadros de 128×128 em RGB565.
+Resumo: pelo cabo, a configuração é feita por *feature reports* de 64 bytes na interface 3 (iluminação, tabela de 144 teclas para remapeamento e cores, ajustes, relógio), e a imagem da tela vai em blocos de 4096 bytes pela interface 2, quadros de 128×128 em RGB565. Pelo dongle, os mesmos dados vão em pacotes de 32 bytes com soma de verificação na interface 3 do dongle, e o teclado confirma cada um.
 
 O código:
 

@@ -16,3 +16,8 @@
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0c45", ATTR{idProduct}=="800a", ENV{ID_GPHOTO2}="", ENV{GPHOTO2_DRIVER}=""
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="800a", ENV{AJAZZ_AK820}="1", ENV{ID_GPHOTO2}="", ENV{GPHOTO2_DRIVER}=""
 SUBSYSTEM=="hidraw", ENV{AJAZZ_AK820}=="1", ATTRS{bInterfaceNumber}=="0[23]", TAG+="uaccess"
+
+# Dongle 2.4 GHz (0c45:fdfd): só as interfaces 3 (configuração sem fio, usada pelo
+# software oficial) e 4. A 0 (teclado), a 1 (mouse) e a 2 (multimídia) ficam de fora.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="fdfd", ENV{AJAZZ_DONGLE}="1"
+SUBSYSTEM=="hidraw", ENV{AJAZZ_DONGLE}=="1", ATTRS{bInterfaceNumber}=="0[34]", TAG+="uaccess"

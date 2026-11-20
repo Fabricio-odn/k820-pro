@@ -314,3 +314,60 @@ def sequencia_restaurar():
             + sequencia_tabela(CMD_TECLAS_FN, vazia)
             + sequencia_iluminacao(padrao_luz)
             + sequencia_ajustes(Ajustes()))
+
+
+# --- Dongle 2.4 GHz (0c45:fdfd, interface 3) -------------------------------------------
+# Output reports de 32 bytes: [comando, tamanho, posição, até 28 bytes de dados, soma],
+# onde o último byte é a soma dos 31 anteriores. O teclado devolve um eco de cada um
+# (mesmo comando e posição) na mesma interface. Os dados são os mesmos do cabo:
+# o pacote de luz, a tabela de 576 bytes, os campos de ajustes e do relógio.
+# Não há tela nem restauração de fábrica pelo dongle (não observadas).
+SEM_FIO_TAM = 32
+SEM_FIO_DADOS = 28
+SF_INFO, SF_TECLA, SF_LUZ, SF_AJUSTES, SF_RELOGIO, SF_TABELA_LUZ, SF_PRESENCA = (
+    0x02, 0x03, 0x05, 0x07, 0x0C, 0x14, 0x20)
+
+
+def quadro_sem_fio(comando, posicao=0, dados=b""):
+    if len(dados) > SEM_FIO_DADOS:
+        raise ValueError("dados demais para um pacote do dongle")
+    q = bytearray(SEM_FIO_TAM)
+    q[0], q[1], q[2] = comando, len(dados), posicao
+    q[3:3 + len(dados)] = dados
+    q[-1] = sum(q[:-1]) & 0xFF
+    return bytes(q)
+
+
+SEM_FIO_INFO = quadro_sem_fio(SF_INFO)
+
+
+def _curto(dados64):
+    """Os 14 primeiros bytes de um pacote de dados do cabo, com o AA 55 logo depois."""
+    return bytes(dados64[:14]) + b"\xaa\x55"
+
+
+def sem_fio_iluminacao(il: Iluminacao):
+    return [quadro_sem_fio(SF_LUZ, 0, pacote_iluminacao(il)[:16])]
+
+
+def sem_fio_relogio(momento: datetime):
+    return [quadro_sem_fio(SF_RELOGIO, 0, _curto(sequencia_relogio(momento)[2]))]
+
+
+def sem_fio_ajustes(aj: Ajustes):
+    return [quadro_sem_fio(SF_AJUSTES, 0, _curto(sequencia_ajustes(aj)[2]))]
+
+
+def sem_fio_tecla(indice, entrada):
+    """Uma tecla da tabela de remapeamento: posição = índice da tecla, 4 bytes da ação."""
+    if not 0 <= indice < TABELA_ENTRADAS - 1 or len(entrada) != 4:
+        raise ValueError("tecla ou ação inválida")
+    return [quadro_sem_fio(SF_TECLA, indice, entrada)]
+
+
+def sem_fio_luz_por_tecla(cores, indices, brilho=BRILHO_MAX):
+    cabo = sequencia_luz_por_tecla(cores, indices, brilho)
+    efeito = quadro_sem_fio(SF_LUZ, 0, cabo[2][:16])
+    tabela = b"".join(cabo[7:7 + TABELA_PACOTES])
+    pedacos = [tabela[i:i + SEM_FIO_DADOS] for i in range(0, len(tabela), SEM_FIO_DADOS)]
+    return [efeito] + [quadro_sem_fio(SF_TABELA_LUZ, n, p) for n, p in enumerate(pedacos)]
