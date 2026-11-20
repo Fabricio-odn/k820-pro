@@ -566,7 +566,7 @@ def _nome_acao(acao):
 
 
 def salvar_idioma(codigo):
-    from ..estado import caminho_padrao
-    arq = caminho_padrao().with_name("idioma")
-    arq.parent.mkdir(parents=True, exist_ok=True)
-    arq.write_text(codigo + "\n")
+    from ..preferencias import Preferencias
+    prefs = Preferencias.carregar()
+    prefs.idioma = codigo
+    prefs.salvar()

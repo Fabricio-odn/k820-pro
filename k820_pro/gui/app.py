@@ -1,4 +1,5 @@
 """Ponto de entrada da interface: python3 -m k820_pro.gui.app (ou o comando k820-gui)."""
+import os
 import sys
 
 import gi
@@ -10,23 +11,19 @@ from pathlib import Path  # noqa: E402
 from gi.repository import Adw, Gdk, Gtk  # noqa: E402
 
 from .. import i18n  # noqa: E402
-from ..estado import caminho_padrao  # noqa: E402
+from ..preferencias import Preferencias  # noqa: E402
 
 ID_APLICATIVO = "io.github.k820pro.Configurador"
 
 
-def _idioma_salvo():
+def _aplicar_idioma(prefs):
     """Escolha feita na interface; K820_IDIOMA no ambiente tem prioridade."""
-    try:
-        codigo = caminho_padrao().with_name("idioma").read_text().strip()
-    except OSError:
-        return
-    if codigo in i18n.IDIOMAS and "K820_IDIOMA" not in __import__("os").environ:
-        i18n.definir(codigo)
+    if prefs.idioma and "K820_IDIOMA" not in os.environ:
+        i18n.definir(prefs.idioma)
 
 
 def main(argv=None):
-    _idioma_salvo()
+    _aplicar_idioma(Preferencias.carregar())
     from .janela import Janela
 
     app = Adw.Application(application_id=ID_APLICATIVO)
