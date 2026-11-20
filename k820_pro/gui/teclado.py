@@ -44,8 +44,8 @@ class Teclado(Gtk.DrawingArea):
         self.marcadas = set()
         self.versao = VERSOES["neutro"]
         self.tema = "escuro"
-        self.set_content_width(LARGURA * 1.35 + 2 * MARGEM)
-        self.set_content_height(ALTURA * 1.35 + 2 * MARGEM)
+        self.set_content_width(int(LARGURA * 0.55) + 2 * MARGEM)  # encolhe; o desenho se ajusta à largura
+        self.set_content_height(int(ALTURA * 0.55) + 2 * MARGEM)
         self.set_hexpand(True)
         self.set_draw_func(self._desenhar)
         if interativo:

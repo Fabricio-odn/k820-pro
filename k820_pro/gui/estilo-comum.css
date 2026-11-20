@@ -1,0 +1,101 @@
+/* Componentes do K820 Pro Studio, no desenho do dazz-mouse. As cores vêm das
+   variáveis de cada tema (estilo.css e estilo-claro.css). */
+
+.titulo-pagina {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.secundario {
+  color: var(--k820-secundario);
+}
+
+.cartao {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+}
+
+/* escolhas (efeitos, versões): a marcada fica na cor de destaque, invertida */
+.opcao {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  min-height: 40px;
+}
+
+.opcao:checked {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border-color: var(--accent-bg-color);
+}
+
+.amostra {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+}
+
+.amostra:checked {
+  border-color: var(--accent-bg-color);
+}
+
+scale highlight,
+scale slider {
+  background-color: var(--accent-bg-color);
+}
+
+toggle-group toggle:checked {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
+
+button.suggested-action {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
+
+.barra-lateral {
+  background-color: var(--sidebar-bg-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.barra-lateral row {
+  min-height: 44px;
+  border-radius: 8px;
+  color: var(--k820-secundario);
+}
+
+.barra-lateral row:selected {
+  background-color: var(--k820-lateral-selecionada);
+  color: var(--window-fg-color);
+}
+
+/* teclas desenhadas na página Atalhos */
+.tecla-atalho {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* moldura da telinha na página Tela: a tela é preta nas duas cores de tema */
+.moldura-tela {
+  background-color: #000000;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.marca-em-uso {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}

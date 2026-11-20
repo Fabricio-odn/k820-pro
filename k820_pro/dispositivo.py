@@ -58,6 +58,16 @@ def achar_hidraw(classe=Path("/sys/class/hidraw"), interface=INTERFACE_CONFIG):
     raise ErroTeclado(t("Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB."))
 
 
+def versao_firmware(classe=Path("/sys/class/hidraw")):
+    """bcdDevice do teclado como texto ("0110" -> "1.10"), ou None se não estiver ligado."""
+    try:
+        caminho = Path(classe) / Path(achar_hidraw(classe)).name / "device"
+        bcd = (caminho.resolve().parent.parent / "bcdDevice").read_text().strip()
+    except (ErroTeclado, OSError):
+        return None
+    return f"{int(bcd[:2])}.{bcd[2:]}" if len(bcd) == 4 and bcd.isdigit() else None
+
+
 def preparar_buffer(pacote: bytes) -> bytes:
     """Buffer para o HIDIOCSFEATURE.
 

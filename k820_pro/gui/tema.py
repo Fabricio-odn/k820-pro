@@ -28,11 +28,16 @@ class Tema:
         self.atual = None
         self.provedor = None
         self.registrados = 0
+        self._comum = None
 
     def aplicar(self, nome):
         if nome not in TEMAS:
             raise ValueError(f"tema desconhecido: {nome}")
         tela = Gdk.Display.get_default()
+        if self._comum is None:  # componentes: carregados uma vez, valem para os dois temas
+            self._comum = Gtk.CssProvider()
+            self._comum.load_from_path(str(Path(__file__).with_name("estilo-comum.css")))
+            Gtk.StyleContext.add_provider_for_display(tela, self._comum, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         if self.provedor is not None:
             Gtk.StyleContext.remove_provider_for_display(tela, self.provedor)
             self.registrados -= 1

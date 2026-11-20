@@ -52,7 +52,7 @@ def test_idioma_sobrevive_a_troca_de_tema(tmp_path, monkeypatch):
     j = Janela(None)
     j.lookup_action("idioma").activate(GLib.Variant.new_string("en"))
     j._alternar_tema()
-    j.aj_versao.set_selected(1)
+    j.pagina("ajustes").escolher_versao("cinza-amarelo")
     assert Preferencias.carregar().idioma == "en"
     j.destroy()
 
@@ -76,6 +76,6 @@ def test_falha_ao_salvar_vira_mensagem(tmp_path, monkeypatch):
         raise PermissionError("somente leitura")
     monkeypatch.setattr(Preferencias, "salvar", falhar)
     j._alternar_tema()
-    j.aj_versao.set_selected(2)
+    j.pagina("ajustes").escolher_versao("branco-roxo")
     assert len(avisos) == 2 and all("somente leitura" in a for a in avisos)
     j.destroy()

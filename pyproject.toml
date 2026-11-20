@@ -27,7 +27,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["k820_pro", "k820_pro.gui"]
+packages = ["k820_pro", "k820_pro.gui", "k820_pro.gui.paginas"]
 
 [tool.setuptools.package-data]
 "k820_pro.gui" = ["icones/hicolor/*/apps/*.svg", "*.css"]

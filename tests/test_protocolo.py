@@ -108,3 +108,11 @@ def test_ignora_outros_dispositivos(tmp_path):
 def test_cli_rejeita_direcao_errada(capsys):
     assert main(["luz", "onda", "-d", "cima"]) == 1
     assert "aceita só" in capsys.readouterr().err
+
+
+def test_versao_do_firmware(tmp_path):
+    from k820_pro.dispositivo import versao_firmware
+    classe = _falso_sysfs(tmp_path, "0003:00000C45:0000800A", 3)
+    (tmp_path / "usb" / "bcdDevice").write_text("0110\n")
+    assert versao_firmware(classe) == "1.10"
+    assert versao_firmware(tmp_path / "nada") is None
