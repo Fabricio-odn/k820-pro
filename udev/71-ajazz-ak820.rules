@@ -1,0 +1,11 @@
+# Teclado Ajazz AK820 Pro pelo cabo (0c45:800a, SONiX)
+#
+# Dá ao usuário da sessão (uaccess) acesso aos hidraw das interfaces 2 (envio
+# de imagem para a tela) e 3 (feature report de configuração). As interfaces 0
+# (teclado) e 1 (teclas multimídia) ficam de fora.
+#
+# São duas regras porque idVendor/idProduct ficam no dispositivo USB e
+# bInterfaceNumber na interface, e numa regra só todos os ATTRS precisam casar
+# no mesmo pai (mesmo esquema do 70-dazz-mouse.rules).
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="800a", ENV{AJAZZ_AK820}="1"
+SUBSYSTEM=="hidraw", ENV{AJAZZ_AK820}=="1", ATTRS{bInterfaceNumber}=="0[23]", TAG+="uaccess"

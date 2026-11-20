@@ -1,0 +1,36 @@
+[project]
+name = "k820-pro"
+version = "0.1.0"
+description = "Configura o teclado Ajazz AK820 Pro (0c45:800a) no Linux, sem o software do fabricante"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Fabricio Oliveira" }]
+requires-python = ">=3.10"
+dependencies = []  # a linha de comando só usa a biblioteca padrão
+keywords = ["keyboard", "ajazz", "ak820", "linux", "hidraw", "rgb", "gtk4", "libadwaita"]
+
+[project.optional-dependencies]
+# a janela usa o GTK 4 e a libadwaita do sistema (python3-gobject no Fedora);
+# o Pillow é preciso para mandar imagens para a tela
+gui = ["PyGObject", "Pillow"]
+imagem = ["Pillow"]
+
+[project.urls]
+Repositorio = "https://github.com/Fabricio-odn/k820-pro"
+
+[project.scripts]
+k820 = "k820_pro.cli:main"
+k820-gui = "k820_pro.gui.app:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["k820_pro", "k820_pro.gui"]
+
+[tool.setuptools.package-data]
+"k820_pro.gui" = ["icones/hicolor/*/apps/*.svg"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

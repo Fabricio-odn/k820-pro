@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="arco" x1="0" x2="1">
+      <stop offset="0" stop-color="#ff3b5c"/><stop offset=".33" stop-color="#ffd23f"/>
+      <stop offset=".66" stop-color="#3bd98c"/><stop offset="1" stop-color="#3b8cff"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="30" width="112" height="72" rx="12" fill="#26272c"/>
+  <rect x="8" y="94" width="112" height="8" rx="4" fill="url(#arco)"/>
+  <g fill="#4a4c55">
+    <rect x="18" y="40" width="12" height="11" rx="2"/><rect x="34" y="40" width="12" height="11" rx="2"/>
+    <rect x="50" y="40" width="12" height="11" rx="2"/><rect x="66" y="40" width="12" height="11" rx="2"/>
+    <rect x="18" y="56" width="12" height="11" rx="2"/><rect x="34" y="56" width="12" height="11" rx="2"/>
+    <rect x="50" y="56" width="12" height="11" rx="2"/><rect x="66" y="56" width="12" height="11" rx="2"/>
+    <rect x="18" y="72" width="60" height="11" rx="2"/>
+  </g>
+  <rect x="84" y="40" width="26" height="26" rx="3" fill="url(#arco)"/>
+  <circle cx="97" cy="78" r="6" fill="#4a4c55"/>
+</svg>
