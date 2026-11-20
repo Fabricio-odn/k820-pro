@@ -8,6 +8,10 @@
 
 Não há acesso à rede, nem comandos de shell, nem `sudo`. A regra udev (`udev/71-ajazz-ak820.rules`) usa `TAG+="uaccess"`, que dá acesso só ao usuário da sessão local, em vez de `MODE="0666"`, que liberaria para qualquer processo.
 
+### Atenção: o teclado é confundido com uma câmera
+
+O banco de dados do `libgphoto2` (instalado por padrão no Fedora e no Ubuntu) cadastra `0c45:800a` como a câmera "Vivitar Vivicam 3350B". Por causa disso, a regra `70-uaccess.rules` do systemd libera para o usuário logado o dispositivo USB inteiro e o hidraw da interface 0, por onde passa tudo o que é digitado: qualquer programa rodando com o seu usuário consegue ler o teclado, mesmo no Wayland. Isso acontece **com ou sem este projeto**. A regra udev do projeto desfaz essa liberação (`TAG-="uaccess"` nas interfaces 0 e 1 e no dispositivo USB), deixando só as interfaces de configuração. Para conferir, depois de instalar a regra e reconectar o cabo: `getfacl /dev/hidrawN` da interface 0 não deve listar o seu usuário.
+
 `scripts/captura/` é ferramenta de desenvolvimento: injeta uma biblioteca (`LD_PRELOAD`) no software oficial rodando no Wine para registrar os pacotes. Não é usada pelo programa.
 
 ## Riscos conhecidos

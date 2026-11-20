@@ -59,6 +59,7 @@ O que foi gravado no teclado fica em `~/.config/k820-pro/estado.json`, porque as
 
 - Não usa rede, não roda como root e não tem serviço em segundo plano.
 - A regra udev libera **só** as interfaces de configuração (2 e 3) do `0c45:800a`, e só para quem está logado na máquina (`uaccess`). A interface do teclado em si (o que é digitado) nunca é aberta.
+- **Instale a regra mesmo sem usar o programa:** o `libgphoto2` confunde este teclado com uma câmera, e o systemd acaba liberando a leitura do que é digitado para qualquer programa do usuário. A regra do projeto fecha isso (detalhes no [SECURITY.md](SECURITY.md)).
 - Arquivos de imagem passam por limites de tamanho, de pixels e de quadros antes de serem lidos.
 - Detalhes e como relatar problemas: [SECURITY.md](SECURITY.md).
 

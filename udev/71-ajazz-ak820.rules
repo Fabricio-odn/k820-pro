@@ -1,11 +1,18 @@
 # Teclado Ajazz AK820 Pro pelo cabo (0c45:800a, SONiX)
 #
 # Dá ao usuário da sessão (uaccess) acesso aos hidraw das interfaces 2 (envio
-# de imagem para a tela) e 3 (feature report de configuração). As interfaces 0
-# (teclado) e 1 (teclas multimídia) ficam de fora.
+# de imagem para a tela) e 3 (feature report de configuração).
 #
 # São duas regras porque idVendor/idProduct ficam no dispositivo USB e
 # bInterfaceNumber na interface, e numa regra só todos os ATTRS precisam casar
 # no mesmo pai (mesmo esquema do 70-dazz-mouse.rules).
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="800a", ENV{AJAZZ_AK820}="1"
 SUBSYSTEM=="hidraw", ENV{AJAZZ_AK820}=="1", ATTRS{bInterfaceNumber}=="0[23]", TAG+="uaccess"
+
+# O hwdb do libgphoto2 cadastra 0c45:800a como a câmera "Vivitar Vivicam 3350B",
+# e o 70-uaccess.rules do systemd libera para o usuário tudo que tem ID_GPHOTO2:
+# o dispositivo USB inteiro e o hidraw da interface 0, por onde passa o que é
+# digitado. Este arquivo roda depois do 70 e antes do 73-seat-late (que aplica as
+# permissões), então desfaz isso aqui.
+SUBSYSTEM=="hidraw", ENV{AJAZZ_AK820}=="1", ATTRS{bInterfaceNumber}=="0[01]", TAG-="uaccess", ENV{ID_GPHOTO2}=""
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0c45", ATTR{idProduct}=="800a", TAG-="uaccess", ENV{ID_GPHOTO2}=""

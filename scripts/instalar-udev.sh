@@ -5,5 +5,5 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 install -m 644 udev/71-ajazz-ak820.rules /etc/udev/rules.d/
 udevadm control --reload
-udevadm trigger --subsystem-match=hidraw
+udevadm trigger --subsystem-match=hidraw --subsystem-match=usb --action=change
 echo "regra instalada; se o teclado já estava ligado, desconecte e reconecte o cabo"
