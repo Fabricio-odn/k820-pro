@@ -30,7 +30,7 @@ build-backend = "setuptools.build_meta"
 packages = ["k820_pro", "k820_pro.gui"]
 
 [tool.setuptools.package-data]
-"k820_pro.gui" = ["icones/hicolor/*/apps/*.svg"]
+"k820_pro.gui" = ["icones/hicolor/*/apps/*.svg", "*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

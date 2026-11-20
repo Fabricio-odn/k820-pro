@@ -1,0 +1,30 @@
+/* Tema claro do K820 Pro Studio: preto e branco, como o dazz-mouse. Sem cor de
+   destaque; as únicas cores na tela são as de conteúdo (o teclado, a luz e o
+   GIF). Vermelho só para erro e para ações destrutivas. */
+
+:root {
+  --window-bg-color: #FAFAFA;
+  --window-fg-color: #18181B;
+  --view-bg-color: #FAFAFA;
+  --view-fg-color: #18181B;
+  --headerbar-bg-color: #F0F0F2;
+  --headerbar-fg-color: #18181B;
+  --headerbar-backdrop-color: #F0F0F2;
+  --sidebar-bg-color: #F0F0F2;
+  --sidebar-fg-color: #18181B;
+  --card-bg-color: #FFFFFF;
+  --card-fg-color: #18181B;
+  --popover-bg-color: #FFFFFF;
+  --popover-fg-color: #18181B;
+  --dialog-bg-color: #FFFFFF;
+  --dialog-fg-color: #18181B;
+  --accent-bg-color: #0E0E10;
+  --accent-fg-color: #FFFFFF;
+  --accent-color: #0E0E10;
+  --border-color: #DCDCE0;
+}
+
+/* o seletor de abas fica com cara de botão marcado, sem roxo */
+viewswitcher button:checked {
+  background-color: #E4E4E7;
+}

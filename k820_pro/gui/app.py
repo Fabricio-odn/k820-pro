@@ -25,6 +25,7 @@ def _aplicar_idioma(prefs):
 def main(argv=None):
     _aplicar_idioma(Preferencias.carregar())
     from .janela import Janela
+    from .tema import Tema
 
     app = Adw.Application(application_id=ID_APLICATIVO)
 
@@ -32,7 +33,12 @@ def main(argv=None):
         Gtk.IconTheme.get_for_display(Gdk.Display.get_default()).add_search_path(
             str(Path(__file__).with_name("icones")))
         Gtk.Window.set_default_icon_name(ID_APLICATIVO)
-        janela = app.get_active_window() or Janela(app)
+        janela = app.get_active_window()
+        if janela is None:
+            prefs = Preferencias.carregar()
+            tema = Tema()
+            tema.aplicar(prefs.tema)
+            janela = Janela(app, tema)
         janela.present()
 
     app.connect("activate", ativar)

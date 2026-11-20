@@ -298,4 +298,7 @@ TRADUCOES = {
     "Branco e roxo": {"en": "White and purple", "zh": "白紫"},
     "Preto": {"en": "Black", "zh": "黑色"},
     "Branco": {"en": "White", "zh": "白色"},
+    "Tema claro": {"en": "Light theme", "zh": "浅色主题"},
+    "Tema escuro": {"en": "Dark theme", "zh": "深色主题"},
+    "Cores": {"en": "Colors", "zh": "颜色"},
 }

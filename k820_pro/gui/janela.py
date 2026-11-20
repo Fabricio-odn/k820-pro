@@ -80,8 +80,9 @@ def _botao(rotulo, ao_clicar, sugerido=True):
 
 
 class Janela(Adw.ApplicationWindow):
-    def __init__(self, app):
+    def __init__(self, app, tema=None):
         super().__init__(application=app, title="K820 Pro", default_width=1000, default_height=720)
+        self.tema = tema
         self.trabalho = Trabalhador()
         self.prefs = Preferencias.carregar()
         try:
@@ -95,6 +96,9 @@ class Janela(Adw.ApplicationWindow):
         cab = Adw.HeaderBar()
         cab.set_title_widget(Adw.ViewSwitcher(stack=pilha, policy=Adw.ViewSwitcherPolicy.WIDE))
         cab.pack_end(self._menu_idioma())
+        self.botao_tema = Gtk.Button(css_classes=["flat"])
+        self.botao_tema.connect("clicked", lambda *_: self._alternar_tema())
+        cab.pack_end(self.botao_tema)
 
         self.faixa = Adw.Banner(title=t("Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB."))
         caixa = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -107,7 +111,7 @@ class Janela(Adw.ApplicationWindow):
 
         for nome, titulo, icone, pagina in [
             ("luz", t("Iluminação"), "weather-clear-symbolic", self._pagina_luz()),
-            ("cores", t("Cores por tecla"), "applications-graphics-symbolic", self._pagina_cores()),
+            ("cores", t("Cores"), "applications-graphics-symbolic", self._pagina_cores()),
             ("teclas", t("Teclas"), "input-keyboard-symbolic", self._pagina_teclas()),
             ("tela", t("Tela"), "image-x-generic-symbolic", self._pagina_tela()),
             ("ajustes", t("Ajustes"), "emblem-system-symbolic", self._pagina_ajustes()),
@@ -115,6 +119,9 @@ class Janela(Adw.ApplicationWindow):
         ]:
             pilha.add_titled_with_icon(pagina, nome, titulo, icone)
 
+        self._atualizar_botao_tema()
+        for kb in self._teclados() + [self.luz_previa]:
+            kb.tema = self.prefs.tema
         self._verificar_conexao()
         GLib.timeout_add_seconds(2, self._verificar_conexao)
 
@@ -476,6 +483,21 @@ class Janela(Adw.ApplicationWindow):
         linha.add_suffix(b)
         g3.add(linha)
         return pag
+
+    def _atualizar_botao_tema(self):
+        claro = self.prefs.tema == "claro"
+        self.botao_tema.set_icon_name("weather-clear-night-symbolic" if claro else "weather-clear-symbolic")
+        self.botao_tema.set_tooltip_text(t("Tema escuro") if claro else t("Tema claro"))
+
+    def _alternar_tema(self):
+        self.prefs.tema = "claro" if self.prefs.tema == "escuro" else "escuro"
+        if self.tema:
+            self.tema.aplicar(self.prefs.tema)
+        self.prefs.salvar()
+        self._atualizar_botao_tema()
+        for kb in self._teclados() + [self.luz_previa]:
+            kb.tema = self.prefs.tema
+            kb.queue_draw()
 
     def _teclados(self):
         return [self.kb_cores, self.kb_teclas]

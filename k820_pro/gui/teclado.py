@@ -7,6 +7,7 @@ gi.require_version("PangoCairo", "1.0")
 from gi.repository import Gtk, Pango, PangoCairo  # noqa: E402
 
 from ..layout import TECLAS
+from .tema import CORES_DESENHO
 from .versoes import VERSOES, cor_da_tecla, fundo_da_tecla
 
 ROTULOS = {
@@ -42,6 +43,7 @@ class Teclado(Gtk.DrawingArea):
         self.cores = {}
         self.marcadas = set()
         self.versao = VERSOES["neutro"]
+        self.tema = "escuro"
         self.set_content_width(LARGURA * 1.35 + 2 * MARGEM)
         self.set_content_height(ALTURA * 1.35 + 2 * MARGEM)
         self.set_hexpand(True)
@@ -74,16 +76,19 @@ class Teclado(Gtk.DrawingArea):
             fundo = fundo_da_tecla(self.versao, t.nome, self.cores)
             cr.set_source_rgb(*(c / 255 for c in fundo))
             cr.fill_preserve()
+            cores_tema = CORES_DESENHO[self.tema]
             if t.nome in self.selecao:
-                cr.set_source_rgb(0.21, 0.52, 0.89)
+                cr.set_source_rgb(*(c / 255 for c in cores_tema["selecao"]))
                 cr.set_line_width(3)
             elif t.nome in self.marcadas:
-                cr.set_source_rgb(0.95, 0.6, 0.1)
+                cr.set_source_rgb(*(c / 255 for c in cores_tema["marcada"]))
                 cr.set_line_width(2.5)
+                cr.set_dash([4 * e, 2 * e])
             else:
-                cr.set_source_rgb(0.35, 0.35, 0.38)
+                cr.set_source_rgb(*(c / 255 for c in cores_tema["contorno"]))
                 cr.set_line_width(1)
             cr.stroke()
+            cr.set_dash([])
             texto = rotulo(t)
             if not texto:
                 continue
