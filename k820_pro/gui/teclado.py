@@ -8,7 +8,7 @@ from gi.repository import Gtk, Pango, PangoCairo  # noqa: E402
 
 from ..layout import TECLAS
 from .tema import CORES_DESENHO
-from .versoes import VERSOES, cor_da_tecla, fundo_da_tecla
+from .versoes import VERSOES, cor_da_tecla, cor_de_selecao, fundo_da_tecla
 
 ROTULOS = {
     "esc": "Esc", "delete": "Del", "grave": "`", "menos": "-", "igual": "=", "backspace": "⌫",
@@ -78,10 +78,10 @@ class Teclado(Gtk.DrawingArea):
             cr.fill_preserve()
             cores_tema = CORES_DESENHO[self.tema]
             if t.nome in self.selecao:
-                cr.set_source_rgb(*(c / 255 for c in cores_tema["selecao"]))
+                cr.set_source_rgb(*(c / 255 for c in cor_de_selecao(fundo)))
                 cr.set_line_width(3)
             elif t.nome in self.marcadas:
-                cr.set_source_rgb(*(c / 255 for c in cores_tema["marcada"]))
+                cr.set_source_rgb(*(c / 255 for c in cor_de_selecao(fundo)))
                 cr.set_line_width(2.5)
                 cr.set_dash([4 * e, 2 * e])
             else:

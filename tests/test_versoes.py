@@ -45,3 +45,12 @@ def test_preferencia_aceita_as_versoes(tmp_path):
     arq = tmp_path / "p.json"
     arq.write_text('{"versao": "cinza-amarelo"}')
     assert Preferencias.carregar(arq).versao == "cinza-amarelo"
+
+
+def test_contorno_de_selecao_visivel():
+    from k820_pro.gui.versoes import cor_de_selecao
+    for v in VERSOES.values():
+        for tec in TECLAS:
+            fundo = cor_da_tecla(v, tec.nome)[0]
+            a, b = sorted((_luminancia(fundo), _luminancia(cor_de_selecao(fundo))), reverse=True)
+            assert (a + 0.05) / (b + 0.05) >= 3.0, (v.nome, tec.nome)

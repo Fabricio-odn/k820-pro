@@ -24,3 +24,13 @@ def test_valores_estranhos_viram_padrao(tmp_path):
 def test_migra_arquivo_idioma_antigo(tmp_path):
     (tmp_path / "idioma").write_text("en\n")
     assert Preferencias.carregar(tmp_path / "preferencias.json").idioma == "en"
+
+
+def test_idioma_malformado_nao_trava(tmp_path):
+    arq = tmp_path / "preferencias.json"
+    for conteudo in ('{"idioma": ["en"]}', '{"idioma": {}}', '{"tema": ["claro"]}'):
+        arq.write_text(conteudo)
+        assert Preferencias.carregar(arq) == Preferencias()
+    arq.unlink()
+    (tmp_path / "idioma").write_bytes(b"\xff\xfe\x00")
+    assert Preferencias.carregar(arq) == Preferencias()

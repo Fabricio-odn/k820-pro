@@ -43,18 +43,18 @@ class Preferencias:
             try:
                 antigo = caminho.with_name("idioma").read_text().strip()
                 dados["idioma"] = antigo
-            except OSError:
+            except (OSError, ValueError):
                 pass
         except (OSError, ValueError):
             dados = {}
         if not isinstance(dados, dict):
             dados = {}
         p = cls()
-        if dados.get("tema") in TEMAS:
+        if isinstance(dados.get("tema"), str) and dados["tema"] in TEMAS:
             p.tema = dados["tema"]
         if isinstance(dados.get("versao"), str) and dados["versao"] in versoes_validas():
             p.versao = dados["versao"]
-        if dados.get("idioma") in i18n.IDIOMAS:
+        if isinstance(dados.get("idioma"), str) and dados["idioma"] in i18n.IDIOMAS:
             p.idioma = dados["idioma"]
         return p
 

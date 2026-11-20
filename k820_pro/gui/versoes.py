@@ -56,6 +56,23 @@ def cor_da_tecla(versao: Versao, nome: str):
     return versao.alfa, versao.texto_alfa
 
 
+def _luminancia(rgb):
+    def canal(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (canal(c) for c in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def cor_de_selecao(fundo):
+    """Contorno de tecla selecionada ou marcada: preto ou branco, o que contrastar mais
+    com o fundo da tecla, para aparecer em qualquer versão, tema e cor de luz."""
+    escuro, claro = (0x0E, 0x0E, 0x10), (0xFF, 0xFF, 0xFF)
+    lf = _luminancia(fundo)
+    contraste = lambda c: (max(lf, _luminancia(c)) + 0.05) / (min(lf, _luminancia(c)) + 0.05)
+    return max((escuro, claro), key=contraste)
+
+
 def fundo_da_tecla(versao: Versao, nome: str, cores: dict):
     """Cor de fundo no desenho: a cor de luz da tecla, se houver, senão a da versão."""
     return cores[nome] if nome in cores else cor_da_tecla(versao, nome)[0]

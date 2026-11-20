@@ -41,3 +41,17 @@ def test_tema_desconhecido():
     from k820_pro.gui.tema import Tema
     with pytest.raises(ValueError):
         Tema().aplicar("roxo")
+
+
+def test_idioma_sobrevive_a_troca_de_tema(tmp_path, monkeypatch):
+    _gtk()
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    from gi.repository import GLib
+    from k820_pro.gui.janela import Janela
+    from k820_pro.preferencias import Preferencias
+    j = Janela(None)
+    j.lookup_action("idioma").activate(GLib.Variant.new_string("en"))
+    j._alternar_tema()
+    j.aj_versao.set_selected(1)
+    assert Preferencias.carregar().idioma == "en"
+    j.destroy()

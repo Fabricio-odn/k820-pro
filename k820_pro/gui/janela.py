@@ -163,7 +163,8 @@ class Janela(Adw.ApplicationWindow):
 
     def _trocar_idioma(self, acao, valor):
         acao.set_state(valor)
-        salvar_idioma(valor.get_string())
+        self.prefs.idioma = valor.get_string()
+        self.prefs.salvar()
         self.avisar(t("Reinicie o programa para trocar o idioma."))
 
     # iluminação -------------------------------------------------------------
@@ -609,10 +610,3 @@ def _nome_acao(acao):
     if acao in A.MULTIMIDIA:
         return t(acao)
     return " + ".join(_nome_tecla(p) for p in acao.split("+"))
-
-
-def salvar_idioma(codigo):
-    from ..preferencias import Preferencias
-    prefs = Preferencias.carregar()
-    prefs.idioma = codigo
-    prefs.salvar()

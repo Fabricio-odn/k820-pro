@@ -11,10 +11,11 @@ from ..preferencias import TEMAS
 FOLHAS = {"escuro": "estilo.css", "claro": "estilo-claro.css"}
 ESQUEMAS = {"escuro": Adw.ColorScheme.FORCE_DARK, "claro": Adw.ColorScheme.FORCE_LIGHT}
 
-# cores que o desenho do teclado usa em volta das teclas, por tema
+# contorno normal das teclas no desenho, por tema (seleção e marcação usam
+# versoes.cor_de_selecao, que depende da cor da tecla)
 CORES_DESENHO = {
-    "escuro": {"contorno": (0x5A, 0x5A, 0x60), "selecao": (0xFF, 0xFF, 0xFF), "marcada": (0xA1, 0xA1, 0xAA)},
-    "claro": {"contorno": (0xB4, 0xB4, 0xBA), "selecao": (0x0E, 0x0E, 0x10), "marcada": (0x6B, 0x6B, 0x73)},
+    "escuro": {"contorno": (0x5A, 0x5A, 0x60)},
+    "claro": {"contorno": (0xB4, 0xB4, 0xBA)},
 }
 
 
