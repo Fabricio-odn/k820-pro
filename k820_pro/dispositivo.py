@@ -213,12 +213,20 @@ class TecladoSemFio:
     def __exit__(self, *_):
         self.fechar()
 
-    def enviar(self, quadro: bytes):
+    def presente(self):
+        """True se o teclado responde pelo dongle (ligado no 2.4 GHz e acordado)."""
+        try:
+            self.enviar(P.SEM_FIO_PRESENCA, espera=0.8)
+            return True
+        except ErroTeclado:
+            return False
+
+    def enviar(self, quadro: bytes, espera=ESPERA_ECO):
         if len(quadro) != P.SEM_FIO_TAM:
             raise ValueError(f"pacote com {len(quadro)} bytes, esperado {P.SEM_FIO_TAM}")
         _descartar(self.fd)
         os.write(self.fd, b"\x00" + quadro)
-        limite = time.monotonic() + ESPERA_ECO
+        limite = time.monotonic() + espera
         while (resta := limite - time.monotonic()) > 0:
             if select.select([self.fd], [], [], resta)[0]:
                 resp = os.read(self.fd, 64)

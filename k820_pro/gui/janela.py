@@ -1,6 +1,7 @@
 """Janela principal: cabeçalho, barra lateral com as seções e a pilha de páginas,
 no mesmo desenho do dazz-mouse."""
 import threading
+import time
 
 import gi
 
@@ -33,6 +34,7 @@ SECOES = [
 ]
 
 INTERVALO_CONEXAO_S = 2
+INTERVALO_PRESENCA_S = 10  # pelo dongle: pergunta ao teclado se ele está acordado
 TAMANHO_MINIMO = (360, 294)
 LARGURA_EMPILHAR = "max-width: 1100sp"  # páginas de duas colunas viram uma
 LARGURA_ESTREITA = "max-width: 720sp"   # a barra lateral se recolhe
@@ -71,6 +73,9 @@ class Janela(Adw.ApplicationWindow):
         self.tema = tema
         self.trabalho = Trabalhador()
         self._fila = None  # última operação pedida enquanto outra rodava
+        self._modo = None
+        self._acordado = None  # pelo dongle: True/False depois da primeira pergunta
+        self._ultima_pergunta = 0.0
         self.prefs = Preferencias.carregar()
         try:
             self.estado = Estado.carregar()
@@ -171,6 +176,9 @@ class Janela(Adw.ApplicationWindow):
         resultado) só aparece quando é dado. Se outra operação estiver rodando, esta espera e
         roda em seguida (a mais recente substitui a que estava esperando)."""
         def fim(resultado, erro):
+            if self._modo == "dongle":  # o resultado já diz se o teclado está acordado
+                self._acordado = not isinstance(erro, ErroTeclado)
+                self._atualizar_titulo()
             if erro:
                 self.avisar(t("Erro: {erro}", erro=erro))
             elif sucesso:
@@ -221,14 +229,34 @@ class Janela(Adw.ApplicationWindow):
 
     def _checar_conexao(self):
         modo = modo_conexao()
-        self.titulo.set_subtitle({"cabo": t("Conectado pelo cabo"),
-                                  "dongle": t("Conectado pelo dongle 2.4 GHz")}.get(
-                                      modo, t("Desconectado: ligue o cabo USB ou o dongle")))
+        if modo != self._modo:
+            self._modo, self._acordado, self._ultima_pergunta = modo, None, 0.0
+        if modo == "dongle" and time.monotonic() - self._ultima_pergunta >= INTERVALO_PRESENCA_S:
+            # se o teclado estiver ocupado com outra operação, pergunta na próxima volta
+            if self.trabalho.rodar(S.teclado_acordado, self._resposta_presenca):
+                self._ultima_pergunta = time.monotonic()
+        self._atualizar_titulo()
         self.paginas["tela"].definir_modo(modo)
         versao = versao_firmware()
         if versao:
             self.rodape.set_label(t("Firmware {v}", v=versao))
         return GLib.SOURCE_CONTINUE
+
+    def _resposta_presenca(self, resultado, _erro):
+        if self._modo == "dongle":
+            self._acordado = resultado
+            self._atualizar_titulo()
+
+    def _atualizar_titulo(self):
+        if self._modo == "cabo":
+            texto = t("Conectado pelo cabo")
+        elif self._modo == "dongle" and self._acordado is False:
+            texto = t("Dongle conectado, teclado dormindo ou desligado: aperte uma tecla")
+        elif self._modo == "dongle":
+            texto = t("Conectado pelo dongle 2.4 GHz")
+        else:
+            texto = t("Desconectado: ligue o cabo USB ou o dongle")
+        self.titulo.set_subtitle(texto)
 
     def _salvar_prefs(self):
         """A mudança já vale na tela; se não der para gravar, avisa em vez de quebrar."""

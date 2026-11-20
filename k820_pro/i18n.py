@@ -337,4 +337,6 @@ TRADUCOES = {
     "Teclado não encontrado. Ligue o AK820 Pro pelo cabo USB ou pelo dongle 2.4 GHz.": {
         "en": "Keyboard not found. Connect the AK820 Pro with the USB cable or the 2.4 GHz dongle.",
         "zh": "未找到键盘。请用 USB 数据线或 2.4 GHz 接收器连接 AK820 Pro。"},
+    "Dongle conectado, teclado dormindo ou desligado: aperte uma tecla": {
+        "en": "Dongle connected, keyboard asleep or off: press a key", "zh": "接收器已连接，键盘休眠或关闭：请按任意键"},
 }

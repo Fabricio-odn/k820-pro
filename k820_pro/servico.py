@@ -99,6 +99,16 @@ def acertar_relogio(momento=None):
     return momento
 
 
+def teclado_acordado():
+    """Pelo dongle: True se o teclado responde, False se não. Pelo cabo (ou sem
+    conexão nenhuma), None: não há o que perguntar."""
+    try:
+        with conectar() as tec:
+            return tec.presente() if tec.modo == "dongle" else None
+    except ErroTeclado:
+        return None
+
+
 def enviar_tela(caminho, modo="cortar", progresso=None):
     from . import imagem
     quadros, tempos = imagem.carregar(caminho, modo)

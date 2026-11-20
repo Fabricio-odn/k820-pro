@@ -98,3 +98,29 @@ def test_tela_e_restaurar_recusados_pelo_dongle(tmp_path, monkeypatch):
         S.restaurar(Estado())
     with pytest.raises(ErroTeclado):
         TecladoSemFio.enviar_tela(None, [])
+
+
+def test_pacote_de_presenca():
+    assert P.SEM_FIO_PRESENCA == _primeiro(0x20)
+
+
+class _SemResposta(_Falso):
+    def presente(self):
+        return False
+
+
+class _ComResposta(_Falso):
+    def presente(self):
+        return True
+
+
+def test_teclado_acordado(monkeypatch):
+    from k820_pro import servico as S
+    monkeypatch.setattr(S, "conectar", lambda: _ComResposta())
+    assert S.teclado_acordado() is True
+    monkeypatch.setattr(S, "conectar", lambda: _SemResposta())
+    assert S.teclado_acordado() is False
+    cabo = _Falso()
+    cabo.modo = "cabo"
+    monkeypatch.setattr(S, "conectar", lambda: cabo)
+    assert S.teclado_acordado() is None  # pelo cabo não há o que perguntar

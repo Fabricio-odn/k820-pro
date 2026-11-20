@@ -339,6 +339,8 @@ def quadro_sem_fio(comando, posicao=0, dados=b""):
 
 
 SEM_FIO_INFO = quadro_sem_fio(SF_INFO)
+# "está aí?": o software oficial manda a cada 15 s; só há eco com o teclado acordado
+SEM_FIO_PRESENCA = quadro_sem_fio(SF_PRESENCA, 0, b"\x00")
 
 
 def _curto(dados64):
