@@ -289,4 +289,13 @@ TRADUCOES = {
     "Prévia": {"en": "Preview", "zh": "预览"},
     "Simulação aproximada; o teclado só muda ao aplicar.": {
         "en": "Approximate simulation; the keyboard only changes when you apply.", "zh": "近似模拟；只有点击应用后键盘才会改变。"},
+    # versões do teclado e temas
+    "Versão do teclado": {"en": "Keyboard version", "zh": "键盘版本"},
+    "Só muda o desenho do teclado no programa.": {
+        "en": "Only changes how the keyboard is drawn in the app.", "zh": "仅改变程序中键盘的显示样式。"},
+    "Neutro": {"en": "Neutral", "zh": "中性"},
+    "Cinza e amarelo": {"en": "Grey and yellow", "zh": "灰黄"},
+    "Branco e roxo": {"en": "White and purple", "zh": "白紫"},
+    "Preto": {"en": "Black", "zh": "黑色"},
+    "Branco": {"en": "White", "zh": "白色"},
 }

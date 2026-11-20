@@ -7,6 +7,7 @@ gi.require_version("PangoCairo", "1.0")
 from gi.repository import Gtk, Pango, PangoCairo  # noqa: E402
 
 from ..layout import TECLAS
+from .versoes import VERSOES, cor_da_tecla, fundo_da_tecla
 
 ROTULOS = {
     "esc": "Esc", "delete": "Del", "grave": "`", "menos": "-", "igual": "=", "backspace": "⌫",
@@ -40,6 +41,7 @@ class Teclado(Gtk.DrawingArea):
         self.selecao = set()
         self.cores = {}
         self.marcadas = set()
+        self.versao = VERSOES["neutro"]
         self.set_content_width(LARGURA * 1.35 + 2 * MARGEM)
         self.set_content_height(ALTURA * 1.35 + 2 * MARGEM)
         self.set_hexpand(True)
@@ -61,14 +63,16 @@ class Teclado(Gtk.DrawingArea):
     def _desenhar(self, _area, cr, w, h):
         e, dx, dy = self._escala(w, h)
         fonte = Pango.FontDescription.from_string(f"Sans {max(6.5, 7.5 * e):.1f}")
+        if self.versao.corpo:
+            m = 10 * e
+            _arredondado(cr, dx - m, dy - m, LARGURA * e + 2 * m, ALTURA * e + 2 * m, 10 * e)
+            cr.set_source_rgb(*(c / 255 for c in self.versao.corpo))
+            cr.fill()
         for t in TECLAS:
             x, y, lw, lh = self._retangulo(t, e, dx, dy)
             _arredondado(cr, x, y, lw, lh, 4 * e)
-            if t.nome in self.cores:
-                r, g, b = self.cores[t.nome]
-                cr.set_source_rgb(r / 255, g / 255, b / 255)
-            else:
-                cr.set_source_rgb(0.16, 0.16, 0.18)
+            fundo = fundo_da_tecla(self.versao, t.nome, self.cores)
+            cr.set_source_rgb(*(c / 255 for c in fundo))
             cr.fill_preserve()
             if t.nome in self.selecao:
                 cr.set_source_rgb(0.21, 0.52, 0.89)
@@ -83,9 +87,11 @@ class Teclado(Gtk.DrawingArea):
             texto = rotulo(t)
             if not texto:
                 continue
-            fundo = self.cores.get(t.nome, (40, 40, 46))
-            claro = (0.299 * fundo[0] + 0.587 * fundo[1] + 0.114 * fundo[2]) > 140
-            cr.set_source_rgb(*((0.1, 0.1, 0.1) if claro else (0.92, 0.92, 0.92)))
+            if t.nome in self.cores:
+                claro = (0.299 * fundo[0] + 0.587 * fundo[1] + 0.114 * fundo[2]) > 140
+                cr.set_source_rgb(*((0.1, 0.1, 0.1) if claro else (0.92, 0.92, 0.92)))
+            else:
+                cr.set_source_rgb(*(c / 255 for c in cor_da_tecla(self.versao, t.nome)[1]))
             if t.nome in self.bloqueadas:
                 cr.set_source_rgb(0.5, 0.5, 0.5)
             camada = PangoCairo.create_layout(cr)

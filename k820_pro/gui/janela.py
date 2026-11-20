@@ -15,6 +15,8 @@ from ..estado import Estado
 from ..i18n import t
 from ..layout import POR_NOME
 from .efeitos import cor_da_tecla
+from .versoes import VERSOES
+from ..preferencias import Preferencias
 from .teclado import Teclado
 from ..layout import TECLAS
 
@@ -81,6 +83,7 @@ class Janela(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="K820 Pro", default_width=1000, default_height=720)
         self.trabalho = Trabalhador()
+        self.prefs = Preferencias.carregar()
         try:
             self.estado = Estado.carregar()
         except ValueError as e:
@@ -215,6 +218,7 @@ class Janela(Adw.ApplicationWindow):
     def _pagina_cores(self):
         caixa = _caixa_pagina(t("Clique nas teclas para selecionar; depois escolha a cor e pinte."))
         self.kb_cores = Teclado(multipla=True)
+        self.kb_cores.versao = VERSOES[self.prefs.versao]
         self.kb_cores.cores = {n: S.cor_hex(c) for n, c in self.estado.cores.items()}
         caixa.append(self.kb_cores)
         barra = Gtk.Box(spacing=8, halign=Gtk.Align.CENTER, margin_top=8)
@@ -262,6 +266,7 @@ class Janela(Adw.ApplicationWindow):
     def _pagina_teclas(self):
         caixa = _caixa_pagina(t("Clique numa tecla e escolha o que ela deve fazer."))
         self.kb_teclas = Teclado(ao_mudar=self._tecla_escolhida, bloqueadas={"fn"})
+        self.kb_teclas.versao = VERSOES[self.prefs.versao]
         caixa.append(self.kb_teclas)
 
         grupo = Gtk.ListBox(css_classes=["boxed-list"], margin_top=12)
@@ -446,6 +451,15 @@ class Janela(Adw.ApplicationWindow):
         g1.add(self.aj_resp)
         g1.add(_botao(t("Aplicar"), self._aplicar_ajustes))
 
+        gv = Adw.PreferencesGroup(title=t("Versão do teclado"))
+        pag.add(gv)
+        chaves_v = list(VERSOES)
+        self.aj_versao = _combo(t("Versão do teclado"), [t(v.nome) for v in VERSOES.values()],
+                                chaves_v.index(self.prefs.versao))
+        self.aj_versao.set_subtitle(t("Só muda o desenho do teclado no programa."))
+        self.aj_versao.connect("notify::selected", lambda *_: self._trocar_versao())
+        gv.add(self.aj_versao)
+
         g2 = Adw.PreferencesGroup(title=t("Relógio da tela"))
         pag.add(g2)
         linha = Adw.ActionRow(title=t("Acertar com a hora do computador"))
@@ -462,6 +476,16 @@ class Janela(Adw.ApplicationWindow):
         linha.add_suffix(b)
         g3.add(linha)
         return pag
+
+    def _teclados(self):
+        return [self.kb_cores, self.kb_teclas]
+
+    def _trocar_versao(self):
+        self.prefs.versao = list(VERSOES)[self.aj_versao.get_selected()]
+        self.prefs.salvar()
+        for kb in self._teclados():
+            kb.versao = VERSOES[self.prefs.versao]
+            kb.queue_draw()
 
     def _aplicar_ajustes(self):
         sono = SONO_OPCOES[self.aj_sono.get_selected()][0]
